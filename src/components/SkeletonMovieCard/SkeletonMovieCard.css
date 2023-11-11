@@ -1,0 +1,35 @@
+.ant-space,
+.right-block,
+.left-block,
+.left-block div {
+    height: 100% !important;
+    width: 100% !important;
+}
+
+.ant-skeleton-input {
+    width: 100% !important;
+}
+
+.right-block {
+    padding: 10px;
+}
+
+.ant-space-item:first-child {
+    height: 100%;
+    width: 40%;
+}
+
+.ant-space-item:last-child {
+    height: 100%;
+    width: 55%;
+}
+
+.description {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.description div {
+    margin-bottom: 10px;
+}

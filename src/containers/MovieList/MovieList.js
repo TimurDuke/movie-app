@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import MovieCard from '../../components/MovieCard';
 import { apiToken, movieUrl } from '../../config';
+import SkeletonMovieCard from '../../components/SkeletonMovieCard';
 import './MovieList.css';
 
 export default class MovieList extends Component {
@@ -67,7 +68,8 @@ export default class MovieList extends Component {
         } = this.state;
 
         const card = !isLoading ? <CardView movies={movies} /> : null;
-        const cardSkeleton = isLoading && !isError ? <p>qwe</p> : null;
+        const cardSkeleton =
+            isLoading && !isError ? <SkeletonMovieCard /> : null;
 
         const errorNotice =
             !isLoading && isError ? (
@@ -107,14 +109,14 @@ const ErrorView = ({ title, description }) => (
 
 const CardView = ({ movies }) =>
     movies.map(movie => {
-        const maxLength = 200;
+        const maxDescriptionLength = 200;
         const releaseDate = movie['release_date'];
         let description = movie['overview'];
         const formattedDate = format(new Date(releaseDate), 'MMMM d, yyyy');
 
-        if (description.length >= maxLength) {
+        if (description.length >= maxDescriptionLength) {
             const truncated = description
-                .slice(0, maxLength + 1)
+                .slice(0, maxDescriptionLength + 1)
                 .split(' ')
                 .slice(0, -1)
                 .join(' ');
