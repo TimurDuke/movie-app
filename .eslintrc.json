@@ -11,6 +11,7 @@
         "no-nested-ternary": "off",
         "dot-notation": "off",
         "no-extra-boolean-cast": "off",
+        "import/no-extraneous-dependencies": "off",
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "react/jsx-props-no-spreading": "off",
         "react/state-in-constructor": [1, "always"],

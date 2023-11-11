@@ -1,5 +1,6 @@
 .wrapper {
     background: #f7f7f7;
+    min-height: 100vh;
 }
 
 .wrapper-inner {
