@@ -9,6 +9,7 @@
   "plugins": ["react", "jsx-a11y", "import", "react-hooks"],
   "rules": {
     "no-nested-ternary": "off",
+    "dot-notation": "off",
     "no-extra-boolean-cast": "off",
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "react/jsx-props-no-spreading": "off",
