@@ -16,7 +16,8 @@
 }
 
 @media screen and (max-width: 865px) {
-    .wrapper-inner, .wrapper {
+    .wrapper-inner,
+    .wrapper {
         background: transparent;
     }
 

@@ -1,47 +1,47 @@
 {
-  "extends": [
-    "airbnb",
-    "prettier",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "parser": "babel-eslint",
-  "plugins": ["react", "jsx-a11y", "import", "react-hooks"],
-  "rules": {
-    "no-nested-ternary": "off",
-    "dot-notation": "off",
-    "no-extra-boolean-cast": "off",
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
-    "react/jsx-props-no-spreading": "off",
-    "react/state-in-constructor": [1, "always"],
-    "react/static-property-placement": "off",
-    "react/react-in-jsx-scope": "off",
-    "react/prefer-stateless-function": "off",
-    "react/prop-types": [1],
-    "react/forbid-prop-types": "off",
-    "jsx-a11y/anchor-is-valid": "off",
-    "jsx-a11y/no-autofocus": "off",
-    "jsx-a11y/label-has-associated-control": "off",
-    "import/prefer-default-export": "off",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    "react/destructuring-assignment": "off"
-  },
-  "env": {
-    "browser": true,
-    "node": true,
-    "es6": true
-  },
-  "parserOptions": {
-    "ecmaVersion": 2021,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
+    "extends": [
+        "airbnb",
+        "prettier",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended"
+    ],
+    "parser": "babel-eslint",
+    "plugins": ["react", "jsx-a11y", "import", "react-hooks"],
+    "rules": {
+        "no-nested-ternary": "off",
+        "dot-notation": "off",
+        "no-extra-boolean-cast": "off",
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/jsx-props-no-spreading": "off",
+        "react/state-in-constructor": [1, "always"],
+        "react/static-property-placement": "off",
+        "react/react-in-jsx-scope": "off",
+        "react/prefer-stateless-function": "off",
+        "react/prop-types": [1],
+        "react/forbid-prop-types": "off",
+        "jsx-a11y/anchor-is-valid": "off",
+        "jsx-a11y/no-autofocus": "off",
+        "jsx-a11y/label-has-associated-control": "off",
+        "import/prefer-default-export": "off",
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn",
+        "react/destructuring-assignment": "off"
+    },
+    "env": {
+        "browser": true,
+        "node": true,
+        "es6": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 2021,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
     }
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  }
 }
