@@ -3,7 +3,7 @@ import { Alert, Flex } from 'antd';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 import MovieCard from '../../components/MovieCard';
-import { apiToken, movieUrl } from '../../config';
+import { getOptions, movieUrl } from '../../config';
 import SkeletonMovieCard from '../../components/SkeletonMovieCard';
 import './MovieList.css';
 
@@ -23,20 +23,16 @@ export default class MovieList extends Component {
         this.getMovieCount = 6;
     }
 
-    async componentDidMount() {
-        const options = {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                Authorization: `Bearer ${apiToken}`,
-            },
-        };
+    componentDidMount() {
+        this.fetchMovies();
+    }
 
+    fetchMovies = async () => {
         try {
             this.setState(prev => ({ ...prev, isLoading: true }));
             const res = await fetch(
                 `${movieUrl}search/movie?query=return&page=1`,
-                options
+                getOptions
             );
 
             if (!res.ok) {
@@ -58,7 +54,7 @@ export default class MovieList extends Component {
                 error: { isError: true, errorMessage: e.message },
             }));
         }
-    }
+    };
 
     render() {
         const {
@@ -67,9 +63,22 @@ export default class MovieList extends Component {
             movies,
         } = this.state;
 
-        const card = !isLoading ? <CardView movies={movies} /> : null;
-        const cardSkeleton =
-            isLoading && !isError ? <SkeletonMovieCard /> : null;
+        const movieCards = !isLoading ? <CardView movies={movies} /> : null;
+
+        const skeletonCards = () => {
+            if (isLoading && !isError) {
+                const cardsCount = Array.from(
+                    { length: this.getMovieCount },
+                    (_, index) => index + 1
+                );
+
+                return cardsCount.map(() => (
+                    <SkeletonMovieCard key={crypto.randomUUID()} />
+                ));
+            }
+
+            return null;
+        };
 
         const errorNotice =
             !isLoading && isError ? (
@@ -81,8 +90,8 @@ export default class MovieList extends Component {
                 {errorNotice}
                 <Flex className="wrapper" justify="center">
                     <Flex className="wrapper-inner" wrap="wrap">
-                        {card}
-                        {cardSkeleton}
+                        {movieCards}
+                        {skeletonCards()}
                     </Flex>
                 </Flex>
             </>
