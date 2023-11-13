@@ -2,9 +2,12 @@ import React, { Component } from 'react';
 import { Alert, Flex } from 'antd';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import MovieCard from '../../components/MovieCard';
+import { debounce } from 'lodash/function';
 import { getOptions, movieUrl } from '../../config';
+import MovieCard from '../../components/MovieCard';
 import SkeletonMovieCard from '../../components/SkeletonMovieCard';
+import SearchInput from '../../components/SearchInput';
+import PaginationComponent from '../../components/PaginationComponent';
 import './MovieList.css';
 
 export default class MovieList extends Component {
@@ -18,42 +21,111 @@ export default class MovieList extends Component {
                 errorMessage: null,
                 isError: false,
             },
+            currentPage: 1,
+            totalPages: 0,
+            searchTerm: '',
+            imageProps: {
+                baseUrl: '',
+                posterSize: 'w500',
+            },
         };
 
-        this.getMovieCount = 6;
+        this.getMovieCount = 20;
+        this.debouncedSearchMovies = debounce(this.handleSearch, 500).bind(
+            this
+        );
     }
 
-    componentDidMount() {
-        this.fetchMovies();
+    async componentDidMount() {
+        this.getConfiguration();
+        this.searchMovies();
     }
 
-    fetchMovies = async () => {
+    handleSearch() {
+        this.searchMovies();
+    }
+
+    getConfiguration = async () => {
+        try {
+            const res = await fetch(`${movieUrl}configuration`, getOptions);
+            const body = await res.json();
+
+            this.setState(prev => ({
+                ...prev,
+                imageProps: {
+                    ...prev.imageProps,
+                    baseUrl: body.images['secure_base_url'],
+                },
+            }));
+        } catch (e) {
+            this.setState(prev => ({
+                ...prev,
+                error: { isError: true, errorMessage: e.message },
+            }));
+        }
+    };
+
+    searchMovies = async (page = 1) => {
+        const { searchTerm } = this.state;
+
         try {
             this.setState(prev => ({ ...prev, isLoading: true }));
-            const res = await fetch(
-                `${movieUrl}search/movie?query=return&page=1`,
-                getOptions
-            );
+
+            let url;
+
+            if (searchTerm) {
+                url = `${movieUrl}search/movie?&query=${searchTerm}&page=${page}`;
+            } else {
+                url = `${movieUrl}search/movie?query=return&page=${page}`;
+            }
+
+            const res = await fetch(url, getOptions);
 
             if (!res.ok) {
                 throw new Error(`Error, status code: ${res.status}`);
             }
 
             const body = await res.json();
-            const resMovies = body.results.slice(0, this.getMovieCount);
 
             this.setState(prev => ({
                 ...prev,
-                movies: resMovies,
+                movies: body.results,
+                totalPages: body['total_pages'],
+                currentPage: page,
                 isLoading: false,
             }));
         } catch (e) {
             this.setState(prev => ({
                 ...prev,
-                isLoading: false,
                 error: { isError: true, errorMessage: e.message },
             }));
+        } finally {
+            this.setState(prev => ({ ...prev, isLoading: false }));
         }
+    };
+
+    inputHandler = e => {
+        const searchTerm = e.target.value;
+
+        this.setState(prev => ({ ...prev, searchTerm }));
+        this.debouncedSearchMovies();
+    };
+
+    handlePageChange = page => {
+        this.searchMovies(page);
+        this.scrollToTop();
+    };
+
+    scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+    };
+
+    clearInputHandler = () => {
+        this.setState(prev => ({ ...prev, searchTerm: '' }));
+        this.debouncedSearchMovies();
     };
 
     render() {
@@ -61,24 +133,24 @@ export default class MovieList extends Component {
             isLoading,
             error: { isError, errorMessage },
             movies,
+            currentPage,
+            totalPages,
         } = this.state;
 
-        const movieCards = !isLoading ? <CardView movies={movies} /> : null;
+        const imageUrl = `${this.state.imageProps.baseUrl}${this.state.imageProps.posterSize}`;
 
-        const skeletonCards = () => {
-            if (isLoading && !isError) {
-                const cardsCount = Array.from(
-                    { length: this.getMovieCount },
-                    (_, index) => index + 1
-                );
+        const movieCards = !isLoading ? (
+            <CardView movies={movies} imageUrl={imageUrl} />
+        ) : null;
 
-                return cardsCount.map(() => (
-                    <SkeletonMovieCard key={crypto.randomUUID()} />
-                ));
-            }
+        let skeletonCards;
+        if (isLoading && !isError) {
+            const cardsCount = Array.from({ length: this.getMovieCount });
 
-            return null;
-        };
+            skeletonCards = cardsCount.map(() => (
+                <SkeletonMovieCard key={crypto.randomUUID()} />
+            ));
+        }
 
         const errorNotice =
             !isLoading && isError ? (
@@ -90,8 +162,23 @@ export default class MovieList extends Component {
                 {errorNotice}
                 <Flex className="wrapper" justify="center">
                     <Flex className="wrapper-inner" wrap="wrap">
+                        <SearchInput
+                            size="large"
+                            placeHolder="Type to search..."
+                            inputHandler={this.inputHandler}
+                            value={this.state.searchTerm}
+                            loading={this.state.isLoading}
+                            clearInputHandler={this.clearInputHandler}
+                        />
                         {movieCards}
-                        {skeletonCards()}
+                        {skeletonCards}
+                        {movies.length !== 0 && (
+                            <PaginationComponent
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                handlePageChange={this.handlePageChange}
+                            />
+                        )}
                     </Flex>
                 </Flex>
             </>
@@ -116,13 +203,18 @@ const ErrorView = ({ title, description }) => (
     />
 );
 
-const CardView = ({ movies }) =>
-    movies.map(movie => {
-        const maxDescriptionLength = 200;
-        const releaseDate = movie['release_date'];
+const CardView = ({ movies, imageUrl }) =>
+    movies?.map(movie => {
+        const maxDescriptionLength = 150;
         let description = movie['overview'];
-        const formattedDate = format(new Date(releaseDate), 'MMMM d, yyyy');
+        const releaseDate = movie['release_date'];
+        // Date format
+        const formattedDate =
+            releaseDate !== ''
+                ? format(new Date(releaseDate), 'MMMM d, yyyy')
+                : null;
 
+        // Description truncate
         if (description.length >= maxDescriptionLength) {
             const truncated = description
                 .slice(0, maxDescriptionLength + 1)
@@ -134,16 +226,19 @@ const CardView = ({ movies }) =>
 
         return (
             <MovieCard
-                key={movie.id}
-                title={movie.title}
+                key={movie['id']}
+                title={movie['title']}
                 description={description}
                 releaseDate={formattedDate}
+                imageUrl={imageUrl}
+                image={movie['poster_path']}
             />
         );
     });
 
 CardView.propTypes = {
     movies: PropTypes.arrayOf(PropTypes.object).isRequired,
+    imageUrl: PropTypes.string.isRequired,
 };
 
 ErrorView.propTypes = {

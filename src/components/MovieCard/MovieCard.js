@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Card, Flex, Image, Typography } from 'antd';
 import PropTypes from 'prop-types';
+import placeholderImage from '../../assets/img/movie_placeholder.png';
 
 import './MovieCard.css';
 
@@ -36,23 +37,23 @@ const movieInfoStyles = {
 
 export default class MovieCard extends Component {
     render() {
-        const { title, description, releaseDate } = this.props;
+        const { title, description, releaseDate, image, imageUrl } = this.props;
+
+        const finalImage = image ? `${imageUrl}${image}` : placeholderImage;
 
         return (
             <Card className="card" bodyStyle={bodyCardStyles}>
                 <Flex style={movieInnerStyles} gap={20}>
-                    <Image
-                        width="40%"
-                        height="100%"
-                        src="https://m.media-amazon.com/images/M/MV5BMTIzNDYzMzgtZWMzNS00ODc2LTg2ZmMtOTE2MWZkNzIxMmQ0XkEyXkFqcGdeQXVyNjQ3MDg0MTY@._V1_FMjpg_UX1000_.jpg"
-                    />
+                    <Image width="40%" height="100%" src={finalImage} />
                     <Flex vertical style={movieInfoStyles}>
                         <Title style={titleStyles} level={4}>
                             {title}
                         </Title>
-                        <Text style={releaseDateStyles} type="secondary">
-                            {releaseDate}
-                        </Text>
+                        {releaseDate && (
+                            <Text style={releaseDateStyles} type="secondary">
+                                {releaseDate}
+                            </Text>
+                        )}
                         <Flex>
                             <Button style={genreStyles} type="text">
                                 Action
@@ -69,8 +70,15 @@ export default class MovieCard extends Component {
     }
 }
 
+MovieCard.defaultProps = {
+    releaseDate: null,
+    image: null,
+};
+
 MovieCard.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    releaseDate: PropTypes.string.isRequired,
+    image: PropTypes.string,
+    imageUrl: PropTypes.string.isRequired,
+    releaseDate: PropTypes.string,
 };
