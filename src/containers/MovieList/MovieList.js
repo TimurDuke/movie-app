@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { Alert, Flex } from 'antd';
-import { format } from 'date-fns';
-import PropTypes from 'prop-types';
+import { Button, Flex } from 'antd';
 import { debounce } from 'lodash/function';
 import { getOptions, movieUrl } from '../../config';
 import MovieCard from '../../components/MovieCard';
 import SkeletonMovieCard from '../../components/SkeletonMovieCard';
 import SearchInput from '../../components/SearchInput';
 import PaginationComponent from '../../components/PaginationComponent';
+import NotFoundMovie from '../../components/NotFoundMovie';
 import './MovieList.css';
+import ErrorView from '../../components/ErrorView';
 
 export default class MovieList extends Component {
     constructor() {
@@ -24,6 +24,7 @@ export default class MovieList extends Component {
             currentPage: 1,
             totalPages: 0,
             searchTerm: '',
+            enteredName: '',
             imageProps: {
                 baseUrl: '',
                 posterSize: 'w500',
@@ -34,6 +35,8 @@ export default class MovieList extends Component {
         this.debouncedSearchMovies = debounce(this.handleSearch, 500).bind(
             this
         );
+
+        this.searchInputRef = React.createRef();
     }
 
     async componentDidMount() {
@@ -69,7 +72,11 @@ export default class MovieList extends Component {
         const { searchTerm } = this.state;
 
         try {
-            this.setState(prev => ({ ...prev, isLoading: true }));
+            this.setState(prev => ({
+                ...prev,
+                isLoading: true,
+                enteredName: searchTerm,
+            }));
 
             let url;
 
@@ -92,7 +99,6 @@ export default class MovieList extends Component {
                 movies: body.results,
                 totalPages: body['total_pages'],
                 currentPage: page,
-                isLoading: false,
             }));
         } catch (e) {
             this.setState(prev => ({
@@ -128,41 +134,100 @@ export default class MovieList extends Component {
         this.debouncedSearchMovies();
     };
 
-    render() {
+    focusOnSearchInput = () => {
+        this.searchInputRef.current.focus();
+    };
+
+    renderedCards = () => {
+        const {
+            isLoading,
+            movies,
+            imageProps: { baseUrl, posterSize },
+            error: { isError },
+        } = this.state;
+
+        if (!isLoading && movies.length !== 0) {
+            return movies.map(movie => {
+                const {
+                    id,
+                    title,
+                    poster_path: posterPath,
+                    overview: description,
+                    release_date: releaseDate,
+                } = movie;
+
+                return (
+                    <MovieCard
+                        key={id}
+                        title={title}
+                        description={description}
+                        releaseDate={releaseDate}
+                        baseUrl={baseUrl}
+                        posterSize={posterSize}
+                        image={posterPath}
+                    />
+                );
+            });
+        }
+
+        if (isLoading && !isError) {
+            const cardsCount = Array.from(
+                { length: this.getMovieCount },
+                (_, index) => index
+            );
+            return cardsCount.map(index => <SkeletonMovieCard key={index} />);
+        }
+
+        return null;
+    };
+
+    renderedError = () => {
         const {
             isLoading,
             error: { isError, errorMessage },
+        } = this.state;
+        if (!isLoading && isError) {
+            return (
+                <ErrorView
+                    title="Request error!"
+                    description={
+                        <>
+                            {errorMessage}
+                            <Button
+                                style={{ marginLeft: '10px' }}
+                                onClick={this.searchMovies}
+                                size="small"
+                                type="primary"
+                                danger
+                            >
+                                Try again
+                            </Button>
+                        </>
+                    }
+                />
+            );
+        }
+
+        return null;
+    };
+
+    render() {
+        const {
+            isLoading,
             movies,
             currentPage,
             totalPages,
+            enteredName,
+            error: { isError },
         } = this.state;
-
-        const imageUrl = `${this.state.imageProps.baseUrl}${this.state.imageProps.posterSize}`;
-
-        const movieCards = !isLoading ? (
-            <CardView movies={movies} imageUrl={imageUrl} />
-        ) : null;
-
-        let skeletonCards;
-        if (isLoading && !isError) {
-            const cardsCount = Array.from({ length: this.getMovieCount });
-
-            skeletonCards = cardsCount.map(() => (
-                <SkeletonMovieCard key={crypto.randomUUID()} />
-            ));
-        }
-
-        const errorNotice =
-            !isLoading && isError ? (
-                <ErrorView title="Request error!" description={errorMessage} />
-            ) : null;
 
         return (
             <>
-                {errorNotice}
+                {this.renderedError()}
                 <Flex className="wrapper" justify="center">
                     <Flex className="wrapper-inner" wrap="wrap">
                         <SearchInput
+                            ref={this.searchInputRef}
                             size="large"
                             placeHolder="Type to search..."
                             inputHandler={this.inputHandler}
@@ -170,78 +235,23 @@ export default class MovieList extends Component {
                             loading={this.state.isLoading}
                             clearInputHandler={this.clearInputHandler}
                         />
-                        {movieCards}
-                        {skeletonCards}
-                        {movies.length !== 0 && (
+                        {this.renderedCards()}
+                        {movies.length === 0 && !isLoading && !isError ? (
+                            <NotFoundMovie
+                                onRetrySearch={this.focusOnSearchInput}
+                                enteredName={enteredName}
+                            />
+                        ) : null}
+                        {movies.length !== 0 ? (
                             <PaginationComponent
                                 currentPage={currentPage}
                                 totalPages={totalPages}
                                 handlePageChange={this.handlePageChange}
                             />
-                        )}
+                        ) : null}
                     </Flex>
                 </Flex>
             </>
         );
     }
 }
-
-const ErrorView = ({ title, description }) => (
-    <Alert
-        style={{
-            position: 'absolute',
-            top: '0',
-            left: '50%',
-            translate: '-50% 0',
-            width: '400px',
-        }}
-        message={title}
-        showIcon
-        description={description}
-        type="error"
-        closable
-    />
-);
-
-const CardView = ({ movies, imageUrl }) =>
-    movies?.map(movie => {
-        const maxDescriptionLength = 150;
-        let description = movie['overview'];
-        const releaseDate = movie['release_date'];
-        // Date format
-        const formattedDate =
-            releaseDate !== ''
-                ? format(new Date(releaseDate), 'MMMM d, yyyy')
-                : null;
-
-        // Description truncate
-        if (description.length >= maxDescriptionLength) {
-            const truncated = description
-                .slice(0, maxDescriptionLength + 1)
-                .split(' ')
-                .slice(0, -1)
-                .join(' ');
-            description = truncated.length ? `${truncated} ...` : '';
-        }
-
-        return (
-            <MovieCard
-                key={movie['id']}
-                title={movie['title']}
-                description={description}
-                releaseDate={formattedDate}
-                imageUrl={imageUrl}
-                image={movie['poster_path']}
-            />
-        );
-    });
-
-CardView.propTypes = {
-    movies: PropTypes.arrayOf(PropTypes.object).isRequired,
-    imageUrl: PropTypes.string.isRequired,
-};
-
-ErrorView.propTypes = {
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-};

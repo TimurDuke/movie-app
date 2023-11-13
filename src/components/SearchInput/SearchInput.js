@@ -7,7 +7,7 @@ import {
     SearchOutlined,
 } from '@ant-design/icons';
 
-export default class SearchInput extends Component {
+class SearchInput extends Component {
     render() {
         const {
             inputHandler,
@@ -16,6 +16,7 @@ export default class SearchInput extends Component {
             loading,
             clearInputHandler,
             value,
+            forwardedRef,
         } = this.props;
 
         let suffixIcon;
@@ -32,10 +33,12 @@ export default class SearchInput extends Component {
         return (
             <>
                 <Input
+                    ref={forwardedRef}
                     placeholder={placeHolder}
                     onChange={inputHandler}
                     size={size}
                     value={value}
+                    disabled={loading}
                     suffix={
                         <Button
                             type="secondary"
@@ -49,6 +52,10 @@ export default class SearchInput extends Component {
     }
 }
 
+export default React.forwardRef((props, ref) => (
+    <SearchInput {...props} forwardedRef={ref} />
+));
+
 SearchInput.defaultProps = {
     size: 'middle',
     placeHolder: '',
@@ -61,4 +68,10 @@ SearchInput.propTypes = {
     clearInputHandler: PropTypes.func.isRequired,
     size: PropTypes.string,
     placeHolder: PropTypes.string,
+
+    // eslint-disable-next-line react/require-default-props
+    forwardedRef: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
+    ]),
 };

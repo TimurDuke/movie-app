@@ -1,0 +1,35 @@
+.not-found-card {
+    width: 50%;
+    text-align: center;
+    margin: 20px auto;
+    border: 0;
+    background: linear-gradient(315deg, rgba(248,248,248,1) 50%, rgba(215,215,215,1) 100%);
+}
+
+.not-found-icon {
+    font-size: 84px;
+}
+
+.not-found-title {
+    font-size: 24px;
+}
+
+.not-found-description {
+    font-size: 18px;
+}
+
+.not-found-icon, .not-found-title, .not-found-description {
+    margin: 0 0 15px 0;
+}
+
+.entered-name {
+    font-weight: 500;
+    color: #ff0000;
+    text-decoration: 1px solid red;
+}
+
+@media screen and (max-width: 1070px) {
+    .not-found-card {
+        width: 80%;
+    }
+}
