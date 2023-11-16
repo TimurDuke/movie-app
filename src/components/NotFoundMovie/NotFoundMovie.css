@@ -3,7 +3,11 @@
     text-align: center;
     margin: 20px auto;
     border: 0;
-    background: linear-gradient(315deg, rgba(248,248,248,1) 50%, rgba(215,215,215,1) 100%);
+    background: linear-gradient(
+        315deg,
+        rgba(248, 248, 248, 1) 50%,
+        rgba(215, 215, 215, 1) 100%
+    );
 }
 
 .not-found-icon {
@@ -18,7 +22,9 @@
     font-size: 18px;
 }
 
-.not-found-icon, .not-found-title, .not-found-description {
+.not-found-icon,
+.not-found-title,
+.not-found-description {
     margin: 0 0 15px 0;
 }
 

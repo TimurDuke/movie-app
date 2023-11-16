@@ -3,22 +3,35 @@
     min-height: 100vh;
 }
 
+.ant-tabs {
+    align-items: center;
+}
+
+.ant-tabs-tab {
+    padding: 12px !important;
+    font-size: 16px !important;
+}
+
 .wrapper-inner {
+    background: #fff;
+}
+
+.wrapper-body {
     max-width: 1070px;
     min-width: 1070px;
-    background: #fff;
     gap: 40px;
-    padding: 30px;
+    padding: 0 30px 30px;
     align-items: flex-start;
     align-content: flex-start;
     min-height: 100vh;
 }
 
 @media screen and (max-width: 1075px) {
-    .wrapper-inner {
+    .wrapper-body {
         gap: 30px;
         min-width: 0;
         width: 100%;
+        padding: 0 15px 15px;
     }
 }
 
@@ -32,8 +45,7 @@
         display: inline-block;
     }
 
-    .wrapper-inner {
+    .wrapper-body {
         justify-content: center;
-        padding: 30px 15px;
     }
 }

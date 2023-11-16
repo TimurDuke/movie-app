@@ -1,20 +1,23 @@
 import React, { Component } from 'react';
-import { Button, Flex } from 'antd';
+import { Button, Flex, Tabs } from 'antd';
 import { debounce } from 'lodash/function';
-import { getOptions, movieUrl } from '../../config';
-import MovieCard from '../../components/MovieCard';
-import SkeletonMovieCard from '../../components/SkeletonMovieCard';
-import SearchInput from '../../components/SearchInput';
-import PaginationComponent from '../../components/PaginationComponent';
-import NotFoundMovie from '../../components/NotFoundMovie';
-import './MovieList.css';
+import { requestOptions, movieUrl, appUrl } from '../../config';
 import ErrorView from '../../components/ErrorView';
+import {
+    createSession,
+    getConfiguration,
+    getRequestToken,
+} from '../../movieServices/movieServices';
+import './MovieList.css';
+import MoviesComponent from '../../components/MoviesComponent';
+import RatedMoviesComponent from '../../components/RatedMoviesComponent';
 
 export default class MovieList extends Component {
     constructor() {
         super();
 
         this.state = {
+            sessionId: null,
             movies: [],
             isLoading: false,
             error: {
@@ -31,7 +34,6 @@ export default class MovieList extends Component {
             },
         };
 
-        this.getMovieCount = 20;
         this.debouncedSearchMovies = debounce(this.handleSearch, 500).bind(
             this
         );
@@ -39,7 +41,8 @@ export default class MovieList extends Component {
         this.searchInputRef = React.createRef();
     }
 
-    async componentDidMount() {
+    componentDidMount() {
+        this.initializeAuthProcess();
         this.getConfiguration();
         this.searchMovies();
     }
@@ -48,23 +51,73 @@ export default class MovieList extends Component {
         this.searchMovies();
     }
 
+    getRequestToken = async () => {
+        try {
+            const request = await getRequestToken();
+            if (!request.ok) {
+                throw new Error(`Error, status code: ${request.status}`);
+            }
+
+            return await request.json();
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+            return null;
+        }
+    };
+
+    initializeAuthProcess = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestToken = urlParams.get('request_token');
+
+        if (requestToken) {
+            try {
+                const response = await createSession(requestToken);
+                if (!response.ok) {
+                    throw new Error(`Error, status code: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+
+                this.setState(prev => ({
+                    ...prev,
+                    sessionId: responseData['session_id'],
+                }));
+            } catch (e) {
+                this.authProcess();
+            }
+        } else {
+            this.authProcess();
+        }
+    };
+
+    authProcess = async () => {
+        const token = await this.getRequestToken();
+
+        if (token) {
+            window.location.href = `https://www.themoviedb.org/authenticate/${token['request_token']}?redirect_to=${appUrl}`;
+        }
+    };
+
     getConfiguration = async () => {
         try {
-            const res = await fetch(`${movieUrl}configuration`, getOptions);
-            const body = await res.json();
+            const request = await getConfiguration();
+            if (!request.ok) {
+                throw new Error(`Error, status code: ${request.status}`);
+            }
+
+            const response = await request.json();
 
             this.setState(prev => ({
                 ...prev,
                 imageProps: {
                     ...prev.imageProps,
-                    baseUrl: body.images['secure_base_url'],
+                    baseUrl: response.images['secure_base_url'],
                 },
             }));
         } catch (e) {
-            this.setState(prev => ({
-                ...prev,
-                error: { isError: true, errorMessage: e.message },
-            }));
+            // eslint-disable-next-line no-console
+            console.error(e);
         }
     };
 
@@ -86,18 +139,18 @@ export default class MovieList extends Component {
                 url = `${movieUrl}search/movie?query=return&page=${page}`;
             }
 
-            const res = await fetch(url, getOptions);
+            const request = await fetch(url, requestOptions('GET'));
 
-            if (!res.ok) {
-                throw new Error(`Error, status code: ${res.status}`);
+            if (!request.ok) {
+                throw new Error(`Error, status code: ${request.status}`);
             }
 
-            const body = await res.json();
+            const response = await request.json();
 
             this.setState(prev => ({
                 ...prev,
-                movies: body.results,
-                totalPages: body['total_pages'],
+                movies: response.results,
+                totalPages: response['total_pages'],
                 currentPage: page,
             }));
         } catch (e) {
@@ -134,53 +187,6 @@ export default class MovieList extends Component {
         this.debouncedSearchMovies();
     };
 
-    focusOnSearchInput = () => {
-        this.searchInputRef.current.focus();
-    };
-
-    renderedCards = () => {
-        const {
-            isLoading,
-            movies,
-            imageProps: { baseUrl, posterSize },
-            error: { isError },
-        } = this.state;
-
-        if (!isLoading && movies.length !== 0) {
-            return movies.map(movie => {
-                const {
-                    id,
-                    title,
-                    poster_path: posterPath,
-                    overview: description,
-                    release_date: releaseDate,
-                } = movie;
-
-                return (
-                    <MovieCard
-                        key={id}
-                        title={title}
-                        description={description}
-                        releaseDate={releaseDate}
-                        baseUrl={baseUrl}
-                        posterSize={posterSize}
-                        image={posterPath}
-                    />
-                );
-            });
-        }
-
-        if (isLoading && !isError) {
-            const cardsCount = Array.from(
-                { length: this.getMovieCount },
-                (_, index) => index
-            );
-            return cardsCount.map(index => <SkeletonMovieCard key={index} />);
-        }
-
-        return null;
-    };
-
     renderedError = () => {
         const {
             isLoading,
@@ -211,45 +217,61 @@ export default class MovieList extends Component {
         return null;
     };
 
-    render() {
+    items = () => {
         const {
-            isLoading,
+            sessionId,
             movies,
+            isLoading,
+            searchTerm,
+            error,
             currentPage,
             totalPages,
             enteredName,
-            error: { isError },
+            imageProps,
         } = this.state;
 
+        return [
+            {
+                key: '1',
+                label: 'Search',
+                children: (
+                    <Flex className="wrapper-body" wrap="wrap">
+                        <MoviesComponent
+                            movies={movies}
+                            isLoading={isLoading}
+                            searchTerm={searchTerm}
+                            error={error}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            enteredName={enteredName}
+                            imageProps={imageProps}
+                            inputHandler={this.inputHandler}
+                            clearInputHandler={this.clearInputHandler}
+                            handlePageChange={this.handlePageChange}
+                        />
+                    </Flex>
+                ),
+            },
+            {
+                key: '2',
+                label: 'Rated',
+                children: (
+                    <Flex className="wrapper-body" wrap="wrap">
+                        <RatedMoviesComponent session={{ id: sessionId }} />
+                    </Flex>
+                ),
+            },
+        ];
+    };
+
+    render() {
         return (
             <>
                 {this.renderedError()}
                 <Flex className="wrapper" justify="center">
-                    <Flex className="wrapper-inner" wrap="wrap">
-                        <SearchInput
-                            ref={this.searchInputRef}
-                            size="large"
-                            placeHolder="Type to search..."
-                            inputHandler={this.inputHandler}
-                            value={this.state.searchTerm}
-                            loading={this.state.isLoading}
-                            clearInputHandler={this.clearInputHandler}
-                        />
-                        {this.renderedCards()}
-                        {movies.length === 0 && !isLoading && !isError ? (
-                            <NotFoundMovie
-                                onRetrySearch={this.focusOnSearchInput}
-                                enteredName={enteredName}
-                            />
-                        ) : null}
-                        {movies.length !== 0 ? (
-                            <PaginationComponent
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                handlePageChange={this.handlePageChange}
-                            />
-                        ) : null}
-                    </Flex>
+                    <div className="wrapper-inner">
+                        <Tabs defaultActiveKey="1" items={this.items()} />
+                    </div>
                 </Flex>
             </>
         );

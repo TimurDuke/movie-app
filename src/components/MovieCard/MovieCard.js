@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Card, Flex, Image, Typography } from 'antd';
+import { Button, Card, Flex, Image, Rate, Typography } from 'antd';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 import placeholderImage from '../../assets/img/movie_placeholder.png';
@@ -24,7 +24,8 @@ const genreStyles = {
 };
 
 const titleStyles = {
-    margin: '10px 0',
+    margin: '0',
+    width: '80%',
 };
 
 const movieInnerStyles = {
@@ -34,7 +35,14 @@ const movieInnerStyles = {
 
 const movieInfoStyles = {
     width: '55%',
-    paddingRight: '10px',
+    padding: '0 10px 10px 0',
+};
+
+const titleAndRateBlockStyles = {
+    margin: '10px 0',
+    gap: '10px',
+    alignItems: 'center',
+    justifyContent: 'space-between',
 };
 
 export default class MovieCard extends Component {
@@ -104,12 +112,15 @@ export default class MovieCard extends Component {
                 <Flex style={movieInnerStyles} gap={20}>
                     <Image width="40%" height="100%" src={finalImage} />
                     <Flex vertical style={movieInfoStyles}>
-                        <Title
-                            style={titleStyles}
-                            level={this.innerWidth > 550 ? 4 : 5}
-                        >
-                            {title}
-                        </Title>
+                        <Flex style={titleAndRateBlockStyles}>
+                            <Title
+                                style={titleStyles}
+                                level={this.innerWidth > 550 ? 4 : 5}
+                            >
+                                {title}
+                            </Title>
+                            <div className="badge">6.6</div>
+                        </Flex>
                         {releaseDate && (
                             <Text style={releaseDateStyles} type="secondary">
                                 {releaseDate}
@@ -136,6 +147,16 @@ export default class MovieCard extends Component {
                             </Button>
                         </Flex>
                         <Text>{description}</Text>
+                        <Rate
+                            style={{
+                                display: 'flex',
+                                flexGrow: '1',
+                                alignItems: 'flex-end',
+                            }}
+                            count={10}
+                            allowHalf
+                            defaultValue={2.5}
+                        />
                     </Flex>
                 </Flex>
             </Card>
