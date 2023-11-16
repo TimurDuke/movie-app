@@ -7,6 +7,10 @@
     align-items: center;
 }
 
+.ant-tabs-content-holder {
+    width: 100%;
+}
+
 .ant-tabs-tab {
     padding: 12px !important;
     font-size: 16px !important;
@@ -17,13 +21,20 @@
 }
 
 .wrapper-body {
-    max-width: 1070px;
-    min-width: 1070px;
+    max-width: 1200px;
+    min-width: 1200px;
     gap: 40px;
     padding: 0 30px 30px;
     align-items: flex-start;
     align-content: flex-start;
     min-height: 100vh;
+}
+
+@media screen and (max-width: 1350px) {
+    .wrapper-body {
+        max-width: 1070px;
+        min-width: 1070px;
+    }
 }
 
 @media screen and (max-width: 1075px) {
@@ -33,14 +44,15 @@
         width: 100%;
         padding: 0 15px 15px;
     }
+
+    .wrapper-inner,
+    .wrapper {
+        width: 100%;
+        background: transparent;
+    }
 }
 
 @media screen and (max-width: 865px) {
-    .wrapper-inner,
-    .wrapper {
-        background: transparent;
-    }
-
     .wrapper {
         display: inline-block;
     }

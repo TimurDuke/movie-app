@@ -14,6 +14,7 @@ export default class ErrorView extends Component {
                     left: '50%',
                     translate: '-50% 0',
                     width: '50%',
+                    zIndex: '100',
                 }}
                 message={title}
                 showIcon

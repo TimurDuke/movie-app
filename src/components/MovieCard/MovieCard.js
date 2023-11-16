@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 import placeholderImage from '../../assets/img/movie_placeholder.png';
 
+import { MovieContext } from '../../providers/MovieProvider/MovieProvider';
 import './MovieCard.css';
 
 const { Title, Text } = Typography;
@@ -25,7 +26,6 @@ const genreStyles = {
 
 const titleStyles = {
     margin: '0',
-    width: '80%',
 };
 
 const movieInnerStyles = {
@@ -46,6 +46,8 @@ const titleAndRateBlockStyles = {
 };
 
 export default class MovieCard extends Component {
+    static contextType = MovieContext;
+
     constructor(props) {
         super(props);
 
@@ -96,8 +98,14 @@ export default class MovieCard extends Component {
 
     render() {
         let { description, releaseDate, title } = this.props;
-        const { image, baseUrl, posterSize } = this.props;
+        const { image, id, userRating } = this.props;
         const { maxDescriptionLength } = this.state;
+        const {
+            imageProps: { baseUrl, posterSize },
+            rateMovieHandler,
+            ratedMap,
+            isSessionApproved,
+        } = this.context;
 
         releaseDate = this.formattedDate(releaseDate);
         description = this.textTruncate(description, maxDescriptionLength);
@@ -107,6 +115,12 @@ export default class MovieCard extends Component {
             ? `${baseUrl}${posterSize}${image}`
             : placeholderImage;
 
+        let movieRating = null;
+
+        if (ratedMap) {
+            movieRating = ratedMap[id];
+        }
+
         return (
             <Card className="card" bodyStyle={bodyCardStyles}>
                 <Flex style={movieInnerStyles} gap={20}>
@@ -115,11 +129,20 @@ export default class MovieCard extends Component {
                         <Flex style={titleAndRateBlockStyles}>
                             <Title
                                 style={titleStyles}
+                                className={
+                                    userRating || movieRating
+                                        ? 'title-rating'
+                                        : 'title'
+                                }
                                 level={this.innerWidth > 550 ? 4 : 5}
                             >
                                 {title}
                             </Title>
-                            <div className="badge">6.6</div>
+                            {userRating || movieRating ? (
+                                <div className="badge">
+                                    {userRating || movieRating}
+                                </div>
+                            ) : null}
                         </Flex>
                         {releaseDate && (
                             <Text style={releaseDateStyles} type="secondary">
@@ -147,16 +170,21 @@ export default class MovieCard extends Component {
                             </Button>
                         </Flex>
                         <Text>{description}</Text>
-                        <Rate
-                            style={{
-                                display: 'flex',
-                                flexGrow: '1',
-                                alignItems: 'flex-end',
-                            }}
-                            count={10}
-                            allowHalf
-                            defaultValue={2.5}
-                        />
+                        {isSessionApproved ? (
+                            <Rate
+                                onChange={rating =>
+                                    rateMovieHandler({ rating, movieId: id })
+                                }
+                                style={{
+                                    display: 'flex',
+                                    flexGrow: '1',
+                                    alignItems: 'flex-end',
+                                }}
+                                count={10}
+                                allowHalf
+                                value={userRating || movieRating}
+                            />
+                        ) : null}
                     </Flex>
                 </Flex>
             </Card>
@@ -167,13 +195,14 @@ export default class MovieCard extends Component {
 MovieCard.defaultProps = {
     releaseDate: null,
     image: null,
+    userRating: null,
 };
 
 MovieCard.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     image: PropTypes.string,
-    baseUrl: PropTypes.string.isRequired,
-    posterSize: PropTypes.string.isRequired,
     releaseDate: PropTypes.string,
+    userRating: PropTypes.number,
 };

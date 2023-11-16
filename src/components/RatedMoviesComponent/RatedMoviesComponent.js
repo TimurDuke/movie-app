@@ -1,17 +1,27 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { MovieContext } from '../../providers/MovieProvider/MovieProvider';
+import { renderedCards } from '../../utils/moviesUtils';
 
 export default class RatedMoviesComponent extends Component {
+    static contextType = MovieContext;
+
     componentDidMount() {
-        // eslint-disable-next-line no-console
-        console.log(this.props.session);
+        const { fetchRatedMovies } = this.context;
+
+        fetchRatedMovies();
     }
 
     render() {
-        return <div>asd</div>;
+        const { isRatedLoading, isRatedError, ratedMovies } = this.context;
+
+        return (
+            <>
+                {renderedCards({
+                    isLoading: isRatedLoading,
+                    isError: isRatedError,
+                    movies: ratedMovies,
+                })}
+            </>
+        );
     }
 }
-
-RatedMoviesComponent.propTypes = {
-    session: PropTypes.object.isRequired,
-};

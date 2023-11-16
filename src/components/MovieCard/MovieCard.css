@@ -20,6 +20,14 @@
     font-size: 18px;
 }
 
+.title-rating {
+    width: 80%;
+}
+
+.title {
+    width: 100%;
+}
+
 @media screen and (max-width: 1075px) {
     .ant-rate {
         font-size: 14px;
