@@ -12,6 +12,7 @@ export const renderedCards = ({ isLoading, isError, movies }) => {
                 overview: description,
                 release_date: releaseDate,
                 rating: userRating,
+                genre_ids: genreIds,
             } = movie;
 
             return (
@@ -23,6 +24,7 @@ export const renderedCards = ({ isLoading, isError, movies }) => {
                     releaseDate={releaseDate}
                     image={posterPath}
                     userRating={userRating}
+                    genreIds={genreIds}
                 />
             );
         });

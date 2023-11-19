@@ -3,7 +3,7 @@ import { Button, Flex, Tabs } from 'antd';
 import ErrorView from '../../components/UI/ErrorView';
 import MoviesComponent from '../../components/MoviesComponent';
 import RatedMoviesComponent from '../../components/RatedMoviesComponent';
-import SessionNotification from '../../components/UI/Notification';
+import Notification from '../../components/UI/Notification';
 import { MovieContext } from '../../providers/MovieProvider/MovieProvider';
 
 import './MovieList.css';
@@ -72,20 +72,29 @@ export default class MovieList extends Component {
     ];
 
     render() {
-        const { isSessionDenied, isSessionApproved, authProcess } =
-            this.context;
+        const {
+            isSessionDenied,
+            isSessionApproved,
+            authProcess,
+            isRatedByUserLoading,
+            isRatedError,
+        } = this.context;
 
         return (
             <>
                 {this.renderedError()}
                 <Flex className="wrapper" justify="center">
                     <div className="wrapper-inner">
-                        <SessionNotification
+                        <Notification
                             isSuccess={isSessionApproved}
                             successMessage="You have successfully confirmed your session."
                             isWarning={isSessionDenied}
                             warningMessage="You have not confirmed your session. If you want to rate movies, you need to confirm your session."
                             warningActionHandler={() => authProcess()}
+                        />
+                        <Notification
+                            isSuccess={isRatedByUserLoading && !isRatedError}
+                            successMessage="You have successfully rated the movie."
                         />
                         <Tabs
                             defaultActiveKey="1"

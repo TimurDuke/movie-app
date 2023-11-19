@@ -10,14 +10,17 @@ import {
     fetchMoviesByName,
     authUrl,
     fetchRatedMovies,
-} from '../../movieServices/movieServices';
+    fetchGenres,
+} from '../../services/movieServices';
 
 export const MovieContext = createContext({
     movies: [],
     ratedMovies: [],
     ratedMap: null,
+    genresMap: null,
     isLoading: false,
     isRatedLoading: false,
+    isRatedByUserLoading: false,
     isSessionDenied: false,
     isSessionApproved: false,
     sessionId: null,
@@ -55,8 +58,10 @@ export default class MovieProvider extends Component {
             movies: [],
             ratedMovies: [],
             ratedMap: null,
+            genresMap: null,
             isLoading: false,
             isRatedLoading: false,
+            isRatedByUserLoading: false,
             isSessionDenied: false,
             isSessionApproved: false,
             sessionId: null,
@@ -103,15 +108,24 @@ export default class MovieProvider extends Component {
                 response = await fetchMovies(page);
             }
 
-            if (!response.ok) {
+            const responseGenres = await fetchGenres();
+
+            if (!response.ok && !responseGenres.ok) {
                 throw new Error(`Error, status code: ${response.status}`);
             }
 
             const data = await response.json();
+            const genresData = await responseGenres.json();
+
+            const genresMap = {};
+            genresData['genres'].forEach(genre => {
+                genresMap[genre.id] = genre.name;
+            });
 
             this.setState(prev => ({
                 ...prev,
                 movies: data.results,
+                genresMap,
                 totalPages: data['total_pages'],
                 currentPage: page,
             }));
@@ -218,7 +232,7 @@ export default class MovieProvider extends Component {
             try {
                 this.setState(prev => ({
                     ...prev,
-                    isRatedLoading: true,
+                    isRatedByUserLoading: true,
                 }));
 
                 const response = await rateMovie({
@@ -245,7 +259,7 @@ export default class MovieProvider extends Component {
             } finally {
                 this.setState(prev => ({
                     ...prev,
-                    isRatedLoading: false,
+                    isRatedByUserLoading: false,
                 }));
             }
         }

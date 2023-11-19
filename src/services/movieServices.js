@@ -20,6 +20,9 @@ export const fetchRatedMovies = sessionId =>
         requestOptions('GET')
     );
 
+export const fetchGenres = () =>
+    fetch(`${movieUrl}genre/movie/list?language=en`, requestOptions('GET'));
+
 export const getConfiguration = () =>
     fetch(`${movieUrl}configuration`, requestOptions('GET'));
 

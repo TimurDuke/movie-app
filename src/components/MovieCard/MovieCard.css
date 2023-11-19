@@ -11,7 +11,7 @@
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    border: 3px solid #e9d100;
+    border: 3px solid;
     color: #000;
     font-size: 17px;
 }
@@ -44,8 +44,18 @@
     }
 }
 
-@media screen and (max-width: 650px) {
+@media screen and (max-width: 768px) {
     .card {
         width: 100%;
     }
 }
+
+@media screen and (max-width: 425px) {
+    .badge {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+        border: 2px solid;
+    }
+}
+

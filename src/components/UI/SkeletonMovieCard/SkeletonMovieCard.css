@@ -33,3 +33,35 @@
 .description div {
     margin-bottom: 10px;
 }
+
+@media screen and (max-width: 425px) {
+    .mobile-space {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+        gap: 20px;
+    }
+
+    .top-block, .bottom-block {
+        height: 100% !important;
+        width: 100% !important;
+    }
+
+    .top-block {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .top-block-img {
+        width: 25%;
+    }
+
+    .top-block-info {
+        width: 70%;
+    }
+
+    .ant-space-item {
+        width: 100% !important;
+    }
+}
