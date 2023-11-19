@@ -14,9 +14,9 @@ export const fetchMoviesByName = (searchTerm, page) =>
         requestOptions('GET')
     );
 
-export const fetchRatedMovies = sessionId =>
+export const fetchRatedMovies = (sessionId, page) =>
     fetch(
-        `${movieUrl}account/${accountId}/rated/movies?session_id=${sessionId}`,
+        `${movieUrl}account/${accountId}/rated/movies?session_id=${sessionId}&page=${page}`,
         requestOptions('GET')
     );
 

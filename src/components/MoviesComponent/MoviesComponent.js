@@ -28,9 +28,14 @@ export default class MoviesComponent extends Component {
         const { isSessionApproved, fetchRatedMovies } = this.context;
 
         if (isSessionApproved !== prevState.isSessionApproved) {
-            this.setState({ isSessionApproved });
+            this.setState(prev => ({ ...prev, isSessionApproved }));
             fetchRatedMovies();
         }
+
+        // if (isRatedByUserLoading !== prevState.isRatedByUserLoading) {
+        //     this.setState(prev => ({ ...prev, isRatedByUserLoading }));
+        //     fetchRatedMovies();
+        // }
     }
 
     focusOnSearchInput = () => {
@@ -38,17 +43,10 @@ export default class MoviesComponent extends Component {
     };
 
     handlePageChange = page => {
-        const { searchMovies } = this.context;
+        const { searchMovies, scrollToTop } = this.context;
 
         searchMovies(page);
-        this.scrollToTop();
-    };
-
-    scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-        });
+        scrollToTop();
     };
 
     render() {
@@ -56,8 +54,8 @@ export default class MoviesComponent extends Component {
             isLoading,
             searchTerm,
             movies,
-            currentPage,
-            totalPages,
+            currentMoviePage,
+            totalMovieCount,
             enteredName,
             errors: { isError },
             inputHandler,
@@ -84,8 +82,8 @@ export default class MoviesComponent extends Component {
                 ) : null}
                 {movies.length !== 0 ? (
                     <PaginationComponent
-                        currentPage={currentPage}
-                        totalPages={totalPages}
+                        currentPage={currentMoviePage}
+                        totalPages={totalMovieCount}
                         handlePageChange={this.handlePageChange}
                     />
                 ) : null}

@@ -10,6 +10,7 @@ export default class PaginationComponent extends Component {
             <Pagination
                 style={{ width: '100%', textAlign: 'center' }}
                 current={currentPage}
+                defaultPageSize={20}
                 total={totalPages}
                 onChange={handlePageChange}
                 showSizeChanger={false}

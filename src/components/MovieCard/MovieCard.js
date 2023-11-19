@@ -172,6 +172,7 @@ export default class MovieCard extends PureComponent {
             rateMovieHandler,
             ratedMap,
             isSessionApproved,
+            isRatedByUserLoading,
         } = this.context;
 
         const genreNames = this.getGenreNames(genreIds, this.context.genresMap);
@@ -259,7 +260,9 @@ export default class MovieCard extends PureComponent {
                                         count={10}
                                         allowHalf
                                         value={rating}
-                                        disabled={rating}
+                                        disabled={
+                                            rating || isRatedByUserLoading
+                                        }
                                     />
                                 ) : null}
                             </Flex>
@@ -350,7 +353,9 @@ export default class MovieCard extends PureComponent {
                                         count={10}
                                         allowHalf
                                         value={rating}
-                                        disabled={rating}
+                                        disabled={
+                                            rating || isRatedByUserLoading
+                                        }
                                     />
                                 ) : null}
                             </Flex>

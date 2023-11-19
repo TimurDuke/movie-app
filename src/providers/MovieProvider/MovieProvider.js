@@ -26,8 +26,10 @@ export const MovieContext = createContext({
     sessionId: null,
     searchTerm: '',
     enteredName: '',
-    currentPage: 1,
-    totalPages: 0,
+    currentMoviePage: 1,
+    currentRatedMoviePage: 1,
+    totalRatedMovieCount: 0,
+    totalMovieCount: 0,
     imageProps: {
         baseUrl: '',
         posterSize: 'w500',
@@ -67,8 +69,10 @@ export default class MovieProvider extends Component {
             sessionId: null,
             searchTerm: '',
             enteredName: '',
-            currentPage: 1,
-            totalPages: 0,
+            currentMoviePage: 1,
+            currentRatedMoviePage: 1,
+            totalMovieCount: 0,
+            totalRatedMovieCount: 0,
             imageProps: {
                 baseUrl: '',
                 posterSize: 'w500',
@@ -126,8 +130,8 @@ export default class MovieProvider extends Component {
                 ...prev,
                 movies: data.results,
                 genresMap,
-                totalPages: data['total_pages'],
-                currentPage: page,
+                totalMovieCount: data['total_results'],
+                currentMoviePage: page,
             }));
         } catch (e) {
             this.setState(prev => ({
@@ -261,14 +265,14 @@ export default class MovieProvider extends Component {
         }
     };
 
-    fetchRatedMovies = async () => {
+    fetchRatedMovies = async (page = 1) => {
         const { sessionId, isSessionApproved } = this.state;
 
         if (isSessionApproved) {
             try {
                 this.setState(prev => ({ ...prev, isRatedLoading: true }));
 
-                const response = await fetchRatedMovies(sessionId);
+                const response = await fetchRatedMovies(sessionId, page);
 
                 if (!response.ok) {
                     throw new Error(`Error, status code: ${response.status}`);
@@ -286,6 +290,8 @@ export default class MovieProvider extends Component {
                     ...prev,
                     ratedMovies: data.results,
                     ratedMap,
+                    totalRatedMovieCount: data['total_results'],
+                    currentRatedMoviePage: page,
                 }));
             } catch (e) {
                 this.setState(prev => ({
@@ -313,6 +319,13 @@ export default class MovieProvider extends Component {
         this.debouncedSearchMovies();
     };
 
+    scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+    };
+
     render() {
         return (
             <MovieContext.Provider
@@ -323,10 +336,11 @@ export default class MovieProvider extends Component {
                     authProcess: this.authProcess,
                     getConfiguration: this.getConfiguration,
                     searchMovies: this.searchMovies,
-                    inputHandler: this.inputHandler,
-                    clearInputHandler: this.clearInputHandler,
                     rateMovieHandler: this.rateMovieHandler,
                     fetchRatedMovies: this.fetchRatedMovies,
+                    inputHandler: this.inputHandler,
+                    clearInputHandler: this.clearInputHandler,
+                    scrollToTop: this.scrollToTop,
                 }}
             >
                 {this.props.children}
