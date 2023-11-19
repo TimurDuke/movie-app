@@ -7,6 +7,7 @@ import Notification from '../../components/UI/Notification';
 import { MovieContext } from '../../providers/MovieProvider/MovieProvider';
 
 import './MovieList.css';
+import RatedMoviesEmpty from '../../components/RatedMoviesComponent/RatedMoviesEmpty';
 
 export default class MovieList extends Component {
     static contextType = MovieContext;
@@ -50,26 +51,38 @@ export default class MovieList extends Component {
         return null;
     };
 
-    items = () => [
-        {
-            key: '1',
-            label: 'Search',
-            children: (
-                <Flex className="wrapper-body" wrap="wrap">
-                    <MoviesComponent />
-                </Flex>
-            ),
-        },
-        {
-            key: '2',
-            label: 'Rated',
-            children: (
+    items = () => {
+        const { ratedMovies } = this.context;
+
+        let ratedComponent;
+
+        if (ratedMovies.length === 0) {
+            ratedComponent = <RatedMoviesEmpty />;
+        } else {
+            ratedComponent = (
                 <Flex className="wrapper-body" wrap="wrap">
                     <RatedMoviesComponent />
                 </Flex>
-            ),
-        },
-    ];
+            );
+        }
+
+        return [
+            {
+                key: '1',
+                label: 'Search',
+                children: (
+                    <Flex className="wrapper-body" wrap="wrap">
+                        <MoviesComponent />
+                    </Flex>
+                ),
+            },
+            {
+                key: '2',
+                label: 'Rated',
+                children: ratedComponent,
+            },
+        ];
+    };
 
     render() {
         const {

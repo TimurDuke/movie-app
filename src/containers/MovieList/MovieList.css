@@ -18,11 +18,12 @@
 
 .wrapper-inner {
     background: #fff;
+    max-width: 1200px;
+    min-width: 1200px;
 }
 
 .wrapper-body {
-    max-width: 1200px;
-    min-width: 1200px;
+    width: 100%;
     gap: 40px;
     padding: 0 30px 30px;
     align-items: flex-start;
@@ -31,7 +32,7 @@
 }
 
 @media screen and (max-width: 1350px) {
-    .wrapper-body {
+    .wrapper-inner {
         max-width: 1070px;
         min-width: 1070px;
     }
@@ -40,9 +41,11 @@
 @media screen and (max-width: 1075px) {
     .wrapper-body {
         gap: 30px;
-        min-width: 0;
-        width: 100%;
         padding: 0 15px 15px;
+    }
+
+    .wrapper-inner {
+        min-width: 0;
     }
 
     .wrapper-inner,
