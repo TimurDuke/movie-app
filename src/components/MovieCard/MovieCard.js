@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Button, Card, Flex, Image, Rate, Typography } from 'antd';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
@@ -52,7 +52,7 @@ const titleAndRateBlockStyles = {
     justifyContent: 'space-between',
 };
 
-export default class MovieCard extends Component {
+export default class MovieCard extends PureComponent {
     static contextType = MovieContext;
 
     constructor(props) {

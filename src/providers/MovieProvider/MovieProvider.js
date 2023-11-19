@@ -244,10 +244,6 @@ export default class MovieProvider extends Component {
                 if (!response.ok) {
                     throw new Error(`Error, status code: ${response.status}`);
                 }
-
-                const data = await response.json();
-
-                this.setState(prev => ({ ...prev, ratedMovies: data.results }));
             } catch (e) {
                 this.setState(prev => ({
                     ...prev,
