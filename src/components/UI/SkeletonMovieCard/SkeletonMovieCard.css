@@ -43,7 +43,8 @@
         gap: 20px;
     }
 
-    .top-block, .bottom-block {
+    .top-block,
+    .bottom-block {
         height: 100% !important;
         width: 100% !important;
     }
