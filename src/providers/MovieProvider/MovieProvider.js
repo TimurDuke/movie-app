@@ -3,14 +3,12 @@ import PropTypes from 'prop-types';
 import { debounce } from 'lodash/function';
 import {
     createSession,
-    getRequestToken,
-    getConfiguration,
     rateMovie,
     fetchMovies,
     fetchMoviesByName,
-    authUrl,
     fetchRatedMovies,
     fetchGenres,
+    getConfiguration,
 } from '../../services/movieServices';
 
 export const MovieContext = createContext({
@@ -42,9 +40,7 @@ export const MovieContext = createContext({
     },
     handleSearch: () => {},
     searchMovies: () => {},
-    getRequestToken: () => {},
     initializeAuthProcess: () => {},
-    authProcess: () => {},
     getConfiguration: () => {},
     rateMovieHandler: () => {},
     fetchRatedMovies: () => {},
@@ -143,67 +139,31 @@ export default class MovieProvider extends Component {
         }
     };
 
-    getRequestToken = async () => {
+    initializeAuthProcess = async () => {
         try {
-            const response = await getRequestToken();
+            const response = await createSession();
             if (!response.ok) {
                 throw new Error(`Error, status code: ${response.status}`);
             }
 
-            return await response.json();
+            const data = await response.json();
+
+            this.setState(prev => ({
+                ...prev,
+                isSessionDenied: false,
+                isSessionApproved: true,
+            }));
+
+            this.setState(prev => ({
+                ...prev,
+                sessionId: data['guest_session_id'],
+            }));
         } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e);
-            return null;
-        }
-    };
-
-    initializeAuthProcess = async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const requestToken = urlParams.get('request_token');
-        const isDenied = urlParams.get('denied');
-
-        if (Boolean(isDenied)) {
             this.setState(prev => ({
                 ...prev,
                 isSessionDenied: true,
                 isSessionApproved: false,
             }));
-            return;
-        }
-
-        if (requestToken) {
-            try {
-                const response = await createSession(requestToken);
-                if (!response.ok) {
-                    throw new Error(`Error, status code: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                this.setState(prev => ({
-                    ...prev,
-                    isSessionDenied: false,
-                    isSessionApproved: true,
-                }));
-
-                this.setState(prev => ({
-                    ...prev,
-                    sessionId: data['session_id'],
-                }));
-            } catch (e) {
-                this.authProcess();
-            }
-        } else {
-            this.authProcess();
-        }
-    };
-
-    authProcess = async () => {
-        const token = await this.getRequestToken();
-
-        if (token) {
-            window.location.href = authUrl(token['request_token']);
         }
     };
 
@@ -331,9 +291,7 @@ export default class MovieProvider extends Component {
             <MovieContext.Provider
                 value={{
                     ...this.state,
-                    getRequestToken: this.getRequestToken,
                     initializeAuthProcess: this.initializeAuthProcess,
-                    authProcess: this.authProcess,
                     getConfiguration: this.getConfiguration,
                     searchMovies: this.searchMovies,
                     rateMovieHandler: this.rateMovieHandler,

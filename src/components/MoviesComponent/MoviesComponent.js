@@ -12,7 +12,7 @@ export default class MoviesComponent extends Component {
         super(props);
 
         this.state = {
-            isSessionApproved: null,
+            isRatedByUserLoading: false,
         };
 
         this.searchInputRef = React.createRef();
@@ -25,17 +25,12 @@ export default class MoviesComponent extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { isSessionApproved, fetchRatedMovies } = this.context;
+        const { isRatedByUserLoading, fetchRatedMovies } = this.context;
 
-        if (isSessionApproved !== prevState.isSessionApproved) {
-            this.setState(prev => ({ ...prev, isSessionApproved }));
+        if (isRatedByUserLoading !== prevState.isRatedByUserLoading) {
+            this.setState(prev => ({ ...prev, isRatedByUserLoading }));
             fetchRatedMovies();
         }
-
-        // if (isRatedByUserLoading !== prevState.isRatedByUserLoading) {
-        //     this.setState(prev => ({ ...prev, isRatedByUserLoading }));
-        //     fetchRatedMovies();
-        // }
     }
 
     focusOnSearchInput = () => {

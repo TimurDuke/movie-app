@@ -88,7 +88,6 @@ export default class MovieList extends Component {
         const {
             isSessionDenied,
             isSessionApproved,
-            authProcess,
             isRatedByUserLoading,
             isRatedError,
         } = this.context;
@@ -103,7 +102,6 @@ export default class MovieList extends Component {
                             successMessage="You have successfully confirmed your session."
                             isWarning={isSessionDenied}
                             warningMessage="You have not confirmed your session. If you want to rate movies, you need to confirm your session."
-                            warningActionHandler={() => authProcess()}
                         />
                         <Notification
                             isSuccess={isRatedByUserLoading && !isRatedError}

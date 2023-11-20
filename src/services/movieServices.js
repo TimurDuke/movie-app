@@ -1,7 +1,4 @@
-import { accountId, appUrl, movieUrl, requestOptions } from '../config';
-
-export const authUrl = requestToken =>
-    `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${appUrl}`;
+import { apiKey, movieUrl, requestOptions } from '../config';
 
 export const fetchMovies = page =>
     fetch(
@@ -14,10 +11,9 @@ export const fetchMoviesByName = (searchTerm, page) =>
         requestOptions('GET')
     );
 
-export const fetchRatedMovies = (sessionId, page) =>
+export const fetchRatedMovies = (sessionId, page = 1) =>
     fetch(
-        `${movieUrl}account/${accountId}/rated/movies?session_id=${sessionId}&page=${page}`,
-        requestOptions('GET')
+        `${movieUrl}guest_session/${sessionId}/rated/movies?language=en-US&page=${page}&api_key=${apiKey}`
     );
 
 export const fetchGenres = () =>
@@ -26,17 +22,18 @@ export const fetchGenres = () =>
 export const getConfiguration = () =>
     fetch(`${movieUrl}configuration`, requestOptions('GET'));
 
-export const getRequestToken = () =>
-    fetch(`${movieUrl}authentication/token/new`, requestOptions('GET'));
-
-export const createSession = requestToken =>
-    fetch(
-        `${movieUrl}authentication/session/new`,
-        requestOptions('POST', { request_token: requestToken })
-    );
+export const createSession = () =>
+    fetch(`${movieUrl}authentication/guest_session/new`, requestOptions('GET'));
 
 export const rateMovie = ({ movieId, sessionId, rating }) =>
     fetch(
-        `${movieUrl}movie/${movieId}/rating?session_id=${sessionId}`,
-        requestOptions('POST', { value: rating })
+        `${movieUrl}movie/${movieId}/rating?guest_session_id=${sessionId}&api_key=${apiKey}`,
+        {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'Content-Type': 'application/json;charset=utf-8',
+            },
+            body: JSON.stringify({ value: rating }),
+        }
     );

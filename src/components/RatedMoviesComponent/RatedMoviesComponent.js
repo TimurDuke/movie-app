@@ -8,7 +8,6 @@ export default class RatedMoviesComponent extends Component {
 
     componentDidMount() {
         const { fetchRatedMovies } = this.context;
-
         fetchRatedMovies();
     }
 
