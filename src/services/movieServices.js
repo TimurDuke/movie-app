@@ -2,7 +2,7 @@ import { apiKey, movieUrl, requestOptions } from '../config';
 
 export const fetchMovies = page =>
     fetch(
-        `${movieUrl}search/movie?query=return&page=${page}`,
+        `${movieUrl}search/movie?query=returned&page=${page}`,
         requestOptions('GET')
     );
 export const fetchMoviesByName = (searchTerm, page) =>
